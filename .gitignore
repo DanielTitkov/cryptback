@@ -19,3 +19,13 @@
 
 # Go workspace file
 go.work
+
+
+
+frontend/node_modules
+
+
+# Configs 
+backend/configs/*
+backend/!configs/default.*
+backend/!configs/template.*

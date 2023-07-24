@@ -1,12 +1,16 @@
 <script>
     import { onMount } from "svelte";
     import { writable, derived } from "svelte/store";
+    import LifeBar from './components/LifebBar.svelte';
 
     let game = writable({});
     let key = writable("");
     let success = writable(false);
     let error = writable("");
-    let apiUrl = "http://localhost:8090";
+    let apiUrl = "http://localhost:8000";
+    let prevKey = writable(""); 
+    export let keyChangeCounter = writable(0); 
+    export const lives = 30;
 
     const processedChallenge = derived([key, game], ([$key, $game]) => {
         if ($game.challenge) {
@@ -57,6 +61,17 @@
     };
 
     key.subscribe(($key) => {
+        let $prevKey;
+        prevKey.subscribe(value => $prevKey = value)(); // get the value of prevKey
+        prevKey.set($key); // set prevKey as current key
+
+        if ($prevKey.length <= $key.length) { // check if a character has been added
+            for (let i = 0; i < $key.length; i++) {
+                if ($key[i] !== $prevKey[i]) { // check if a character has changed
+                    keyChangeCounter.update(n => n + 1);
+                }
+            }
+        }
         checkKey();
     });
 
@@ -115,6 +130,10 @@
             </div>
         </section>
 
+        <h2 class="title is-2 has-text-centered">{$keyChangeCounter}</h2>
+       
+        <LifeBar lives={lives} keyChangeCounter={$keyChangeCounter} />
+        
         <section class="section">
             <div class="content is-large">
                 <p>{$processedChallenge}</p>
